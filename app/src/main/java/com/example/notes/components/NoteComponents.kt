@@ -1,7 +1,10 @@
 package com.example.notes.components
 
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -24,9 +27,13 @@ fun NoteInputText(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
+        colors = TextFieldDefaults.colors(
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.primary,
+            unfocusedTextColor = MaterialTheme.colorScheme.primary,
+        ),
         maxLines = maxLines,
-        label = { Text(text=label)},
+        label = { Text(text=label, color = MaterialTheme.colorScheme.primary)},
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = {
             onImeAction()
@@ -34,4 +41,16 @@ fun NoteInputText(
         }),
         modifier = modifier
         )
+}
+
+@Composable
+fun NoteButton(
+    modifier: Modifier = Modifier,
+    label: String,
+    onClick: () -> Unit = {},
+    enabled: Boolean = true
+) {
+    Button(onClick = onClick, shape = CircleShape, enabled = enabled) {
+        Text(label)
+    }
 }

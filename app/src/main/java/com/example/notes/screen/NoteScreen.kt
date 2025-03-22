@@ -1,6 +1,7 @@
 package com.example.notes.screen
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,17 +35,15 @@ import com.example.notes.R
 import com.example.notes.components.NoteButton
 import com.example.notes.components.NoteInputText
 import com.example.notes.model.Note
-import com.example.notes.model.NoteViewModel
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteScreen(
     modifier: Modifier = Modifier,
-    viewModel: NoteViewModel = NoteViewModel()
-//    notes: List<Note> = emptyList(),
-//    onAdd: (Note) -> Unit = {},
-//    onRemove: (UUID) -> Unit = {}
+    notes: List<Note> = emptyList(),
+    onAddNote: (Note) -> Unit = {},
+    onRemoveNote: (Note) -> Unit = {},
 ) {
     val title = remember {
         mutableStateOf("")
@@ -51,6 +51,8 @@ fun NoteScreen(
     val content = remember {
         mutableStateOf("")
     }
+
+    val context = LocalContext.current
 
     Column(modifier = modifier
         .padding(6.dp)
@@ -83,9 +85,10 @@ fun NoteScreen(
             NoteButton(label = "Save", onClick = {
                 Log.d("NOTE", "save note title=${title.value} and content=${content.value}")
                 if(title.value.isNotEmpty() && content.value.isNotEmpty()) {
-                    viewModel.addNote(Note(title = title.value, content = content.value))
+                    onAddNote(Note(title = title.value, content = content.value))
                     title.value = ""
                     content.value = ""
+                    Toast.makeText(context, "added a note", Toast.LENGTH_SHORT).show()
                 }
             })
         }
@@ -93,8 +96,11 @@ fun NoteScreen(
         LazyColumn(modifier = Modifier
             .padding(4.dp)
             .fillMaxSize()) {
-            items(viewModel.notes) { n->
-                NoteRow(note = n)
+            items(notes) { n->
+                NoteRow(note = n, onClick = {
+                    Log.d("LARRY", "note clicked")
+                    onRemoveNote(n)
+                })
             }
         }
     }
@@ -105,10 +111,15 @@ fun NoteRow(modifier: Modifier = Modifier, note: Note, onClick: (Note) -> Unit =
     Card(
         shape = RoundedCornerShape(corner = CornerSize(6.dp)),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFDFE6EB)),
-        modifier = Modifier.padding(6.dp).fillMaxWidth().clickable {
-        onClick(note)
-    }) {
-        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp).fillMaxWidth()) {
+        modifier = Modifier
+            .padding(6.dp)
+            .fillMaxWidth()
+            .clickable {
+                onClick(note)
+            }) {
+        Column(modifier = Modifier
+            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .fillMaxWidth()) {
             Text(note.title, style = MaterialTheme.typography.titleSmall, color = Color.Black)
             Text(note.content, style =  MaterialTheme.typography.bodyLarge, color = Color.Black)
             Text(note.createdAt.format(DateTimeFormatter.ofPattern("EEE, d MMM")), style = MaterialTheme.typography.bodySmall, color = Color.Black)
